@@ -55,7 +55,7 @@ function hasRole(roleRequired) {
  * Returns a jwt token signed by the app secret
  */
 function signToken(id) {
-  return jwt.sign({ _id: id }, config.secret, { expiresInMinutes: 60*24 });
+  return jwt.sign({ _id: id }, config.secret, { expiresIn: 60*24*365 });
 }
 
 /**

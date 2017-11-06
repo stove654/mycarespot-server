@@ -9,6 +9,17 @@ var _ = require('lodash');
 
 // When the user disconnects.. perform this
 function onDisconnect(socket) {
+    User.findOne({socketId: socket.client.id}, function (err, user) {
+        if (user) {
+            User.findById(user._id, function (err, value) {
+                var updated = _.merge(value, {
+                    lastConnection: new Date(),
+                    online: false
+                });
+                updated.save();
+            })
+        }
+    })
 }
 
 // When the user connects.. perform this
@@ -20,6 +31,9 @@ function onConnect(socket) {
 
     // Insert sockets below
     require('../api/thing/thing.socket').register(socket);
+    require('../api/user/user.socket').register(socket);
+    require('../api/channel/channel.socket').register(socket);
+    require('../api/message/message.socket').register(socket);
 }
 
 module.exports = function (socketio) {

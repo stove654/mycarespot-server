@@ -14,9 +14,25 @@ var validationError = function (res, err) {
  * restriction: 'admin'
  */
 exports.index = function (req, res) {
-    User.find({}, '-salt -hashedPassword', function (err, users) {
-        if (err) return res.send(500, err);
-        res.json(200, users);
+    User.find({}, '-salt -hashedPassword')
+        .sort({updatedAt:-1})
+        .exec(function (err, users) {
+            if(err) { return handleError(res, err); }
+            return res.json(200, users);
+        })
+};
+
+// Updates an existing thing in the DB.
+exports.update = function(req, res) {
+    if(req.body._id) { delete req.body._id; }
+    User.findById(req.params.id, function (err, user) {
+        if (err) { return handleError(res, err); }
+        if(!user) { return res.send(404); }
+        var updated = _.merge(user, req.body);
+        updated.save(function (err) {
+            if (err) { return handleError(res, err); }
+            return res.json(200, user);
+        });
     });
 };
 
@@ -29,7 +45,7 @@ exports.create = function (req, res, next) {
     newUser.role = 'user';
     newUser.save(function (err, user) {
         if (err) return validationError(res, err);
-        var token = jwt.sign({_id: user._id}, config.secret, {expiresInMinutes: 60 * 5});
+        var token = jwt.sign({_id: user._id}, config.secret, {expiresIn: 60 * 24 *365});
         res.json({
             success: true,
             message: 'Enjoy your token!',

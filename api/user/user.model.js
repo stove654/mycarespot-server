@@ -37,6 +37,7 @@ var UserSchema = new Schema({
     status: String,
     socketId: String,
     online: Boolean,
+    countryCode: Number,
     block: [
         {
             userId: { type: Schema.Types.ObjectId, ref: 'User' },
