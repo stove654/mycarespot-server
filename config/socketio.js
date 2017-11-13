@@ -34,6 +34,7 @@ function onConnect(socket) {
     require('../api/user/user.socket').register(socket);
     require('../api/channel/channel.socket').register(socket);
     require('../api/message/message.socket').register(socket);
+    require('../api/story/story.socket').register(socket);
 }
 
 module.exports = function (socketio) {

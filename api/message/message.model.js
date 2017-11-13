@@ -21,7 +21,9 @@ var MessageSchema = new Schema({
 	sticker: String,
 	video: String,
 	contact: {},
-	location: {}
+	location: {},
+	fileType: String,
+	audio: String
 }, {
 	timestamps: true
 });

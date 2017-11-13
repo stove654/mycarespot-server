@@ -57,7 +57,8 @@ var UserSchema = new Schema({
     color: {
         type: String,
         default: getRandomColor()
-    }
+    },
+    lastConnection: Date
 }, {
     timestamps: true
 });

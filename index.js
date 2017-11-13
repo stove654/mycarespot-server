@@ -26,6 +26,12 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 require('./config/express')(app);
 require('./routes')(app);
 
+app.post('/api/webrtc', function (req, res, next) {
+    socketio.sockets.emit('webrtc:save', req.body);
+    res.json(201, req.body);
+    next();
+});
+
 app.get('/', function(request, response) {
 	response.send('Hello World!');
 });
