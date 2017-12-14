@@ -14,32 +14,11 @@ var Channel = require('./channel.model');
 
 // Get list of Channels
 exports.index = function (req, res) {
-    Channel.find({'users': {$elemMatch: {user: req.query.userId}}, 'lastMessage': { $ne: null }})
-        .populate('users.user')
+    Channel.find({'users': {$elemMatch: {userId: req.query.userId}}, 'lastMessage': { $ne: null }})
         .exec(function (err, channels) {
             if (err) {
                 return handleError(res, err);
             }
-            _.each(channels, function (value) {
-                if (value.to) {
-                    var user = {
-                        name: value.to.name,
-                        _id: value.to.id,
-                        color: value.to.color,
-                        avatar: value.to.avatar,
-                        phone: value.to.phone
-                    };
-                    value.to = user;
-                }
-
-                _.each(value.users, function (data) {
-                    if (data.user) {
-                        data.user.contacts = null;
-                        data.user.country = null;
-                    }
-
-                })
-            });
             return res.json(200, channels);
         })
 
@@ -76,37 +55,39 @@ exports.show = function (req, res) {
 
 // Creates a new Channel in the DB.
 exports.create = function (req, res) {
-    if (req.body.isGroup) {
-        Channel.create(req.body, function (err, channel) {
-            if (err) {
-                return handleError(res, err);
-            }
+
+    Channel.findOne({
+        from: req.body.from,
+        to: req.body.to
+    }, function (err, channel) {
+        if (channel) {
             return res.status(201).json(channel);
-        });
-    } else {
+        }
         Channel.findOne({
-            from: req.body.from,
-            to: req.body.to
+            from: req.body.to,
+            to: req.body.from
         }, function (err, channel) {
             if (channel) {
                 return res.status(201).json(channel);
             }
-            Channel.findOne({
-                from: req.body.to,
-                to: req.body.from
-            }, function (err, channel) {
-                if (channel) {
-                    return res.status(201).json(channel);
+            req.body.users = [
+                {
+                    userId: req.body.from,
+                    read: 0
+                },
+                {
+                    userId: req.body.to,
+                    read: 0
                 }
-                Channel.create(req.body, function (err, channel) {
-                    if (err) {
-                        return handleError(res, err);
-                    }
-                    return res.status(201).json(channel);
-                });
-            })
+            ];
+            Channel.create(req.body, function (err, channel) {
+                if (err) {
+                    return handleError(res, err);
+                }
+                return res.status(201).json(channel);
+            });
         })
-    }
+    })
 };
 
 // Updates an existing Channel in the DB.
@@ -115,7 +96,6 @@ exports.update = function (req, res) {
         delete req.body._id;
     }
     Channel.findById(req.params.id)
-        .populate('users.user')
         .exec(function (err, Channel) {
             if (err) {
                 return handleError(res, err);
@@ -126,40 +106,12 @@ exports.update = function (req, res) {
             if (req.body.user) {
                 var users = JSON.parse(JSON.stringify(Channel.users));
                 for (var i = 0; i < users.length; i++) {
-                    if (users[i].user._id == req.body.user) {
+                    if (users[i].userId == req.body.user) {
                         users[i].read = 0;
                         break;
                     }
                 }
 
-                Channel.users = null;
-                req.body.users = users
-            }
-
-            if (req.body.userDeleted) {
-                var users = JSON.parse(JSON.stringify(Channel.users));
-                var array = [];
-                for (var i = 0; i < users.length; i++) {
-                    for (var j = 0; j < req.body.userDeleted.length; j++) {
-                        if (users[i].user._id == req.body.userDeleted[j]) {
-                            users[i].isDeleted = true;
-                            break;
-                        }
-                    }
-
-                    if (!users[i].isDeleted) {
-                        array.push(users[i])
-                    }
-                }
-
-                Channel.users = null;
-                req.body.users = array
-            }
-
-            if (req.body.newUser) {
-                var users = JSON.parse(JSON.stringify(Channel.users));
-                if (!users) users = [];
-                users = users.concat(req.body.newUser);
                 Channel.users = null;
                 req.body.users = users
             }

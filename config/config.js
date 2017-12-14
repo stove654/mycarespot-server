@@ -1,6 +1,6 @@
 module.exports = {
     secret: 'ilovejavascript',
-    database: 'mongodb://localhost:27017/messenger',
+    database: 'mongodb://localhost:27017/mycarespot',
     userRoles: ['guest', 'user', 'admin'],
     accountKitUrl: 'https://graph.accountkit.com/v1.2/access_token',
     accessToken: '6f963fe06ebc888cdd74d55fd159f6ab',

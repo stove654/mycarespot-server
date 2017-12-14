@@ -60,25 +60,10 @@ exports.index = function (req, res) {
 	}
 	Message.find(query)
 		.limit(100)
+		.sort({'created_at' : -1})
 		.exec(function (err, Messages) {
 			if (err) {
 				return handleError(res, err);
-			}
-
-			if (req.query.userId) {
-				Channel.findById(req.query.channel, function (err, Channel) {
-					if(Channel) {
-						var updated = _.merge(Channel, {});
-						for (var i = 0; i < Channel.users.length; i++) {
-							if (Channel.users[i].user == req.query.userId) {
-								Channel.users[i].read = 0;
-								break;
-							}
-						}
-						updated.save();
-					}
-
-				});
 			}
             return res.status(200).json(Messages);
 		});
@@ -109,7 +94,7 @@ exports.create = function (req, res) {
 			.exec(function (err, Channel) {
 				var users = JSON.parse(JSON.stringify(Channel.users));
 				for (var i = 0; i < users.length; i++) {
-					if (users[i].user._id == req.body.from.userId) {
+					if (users[i].userId == req.body.from.userId) {
 						users[i].read = 0;
 					} else {
 						users[i].read += 1;
@@ -142,24 +127,24 @@ exports.create = function (req, res) {
 				}
 				var updated = _.merge(Channel, {lastMessage: lastMessage, lastMessageTime: new Date(), users: users});
 				updated.save();
-				var usersPush = [];
-				for (var j = 0; j < Channel.users.length; j++) {
-					if (Channel.users[j].user.userPush && Channel.users[j].user.notification && Channel.users[j].user._id != req.body.from.userId) {
-						usersPush.push(Channel.users[j].user.userPush)
-					}
-				}
-				if (usersPush.length) {
-					var message = {
-						app_id: config.oneSignalAppId,
-						contents: {"en": lastMessage, "es": lastMessage},
-						headings: {"en": req.body.from.name, "es": req.body.from.name},
-						include_player_ids: usersPush,
-						data: {
-							"channel": Channel._id
-						}
-					};
-					sendNotification(message);
-				}
+				// var usersPush = [];
+				// for (var j = 0; j < Channel.users.length; j++) {
+				// 	if (Channel.users[j].user.userPush && Channel.users[j].user.notification && Channel.users[j].user._id != req.body.from.userId) {
+				// 		usersPush.push(Channel.users[j].user.userPush)
+				// 	}
+				// }
+				// if (usersPush.length) {
+				// 	var message = {
+				// 		app_id: config.oneSignalAppId,
+				// 		contents: {"en": lastMessage, "es": lastMessage},
+				// 		headings: {"en": req.body.from.name, "es": req.body.from.name},
+				// 		include_player_ids: usersPush,
+				// 		data: {
+				// 			"channel": Channel._id
+				// 		}
+				// 	};
+				// 	sendNotification(message);
+				// }
 
 			});
 

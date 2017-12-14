@@ -2,18 +2,10 @@
 
 var mongoose = require('mongoose'),
     Schema = mongoose.Schema,
-	User = require('../user/user.model'),
 	Channel = require('../channel/channel.model')
 
 var MessageSchema = new Schema({
-	from: {
-		userId: { type: Schema.Types.ObjectId, ref: 'User' },
-		color: String,
-		name: String,
-		phone: String,
-		avatar: String
-	},
-	to: { type: Schema.Types.ObjectId, ref: 'User' },
+	from: {},
 	text: String,
 	channel: { type: Schema.Types.ObjectId, ref: 'Channel' },
 	image: String,
@@ -23,7 +15,8 @@ var MessageSchema = new Schema({
 	contact: {},
 	location: {},
 	fileType: String,
-	audio: String
+	audio: String,
+	pdf: String
 }, {
 	timestamps: true
 });
