@@ -14,7 +14,10 @@ var ChannelSchema = new Schema({
         default: false
     },
     avatar: String,
-    name: String
+    name: String,
+	userPush: [
+		{type: Schema.Types.ObjectId, ref: 'User'}
+	]
 }, {
     timestamps: true
 });

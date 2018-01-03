@@ -61,14 +61,17 @@ exports.create = function (req, res) {
         to: req.body.to
     }, function (err, channel) {
         if (channel) {
-            return res.status(201).json(channel);
+			updateUserPush(channel._id, req.body.userPush)
+			return res.status(201).json(channel);
         }
         Channel.findOne({
             from: req.body.to,
             to: req.body.from
         }, function (err, channel) {
             if (channel) {
-                return res.status(201).json(channel);
+				updateUserPush(channel._id, req.body.userPush)
+
+				return res.status(201).json(channel);
             }
             req.body.users = [
                 {
@@ -80,6 +83,7 @@ exports.create = function (req, res) {
                     read: 0
                 }
             ];
+
             Channel.create(req.body, function (err, channel) {
                 if (err) {
                     return handleError(res, err);
@@ -89,6 +93,15 @@ exports.create = function (req, res) {
         })
     })
 };
+
+var updateUserPush = function (id, users) {
+	Channel.findById(id, function (err, channel){
+		if (channel) {
+			var updated = _.merge(channel, {userPush: users});
+			updated.save();
+		}
+	})
+}
 
 // Updates an existing Channel in the DB.
 exports.update = function (req, res) {

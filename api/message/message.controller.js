@@ -15,7 +15,6 @@ var Channel = require('../channel/channel.model');
 var config = require('../../config/config.js');
 
 var sendNotification = function(data) {
-	console.log(data)
 	var headers = {
 		"Content-Type": "application/json; charset=utf-8",
 		"Authorization": "Basic " + config.oneSignalKey
@@ -90,9 +89,11 @@ exports.create = function (req, res) {
 		}
 
 		Channel.findById(req.body.channel)
-			.populate('users.user')
+			.populate('userPush')
 			.exec(function (err, Channel) {
 				var users = JSON.parse(JSON.stringify(Channel.users));
+				var datas = JSON.parse(JSON.stringify(Channel.userPush));
+
 				for (var i = 0; i < users.length; i++) {
 					if (users[i].userId == req.body.from.userId) {
 						users[i].read = 0;
@@ -127,24 +128,24 @@ exports.create = function (req, res) {
 				}
 				var updated = _.merge(Channel, {lastMessage: lastMessage, lastMessageTime: new Date(), users: users});
 				updated.save();
-				// var usersPush = [];
-				// for (var j = 0; j < Channel.users.length; j++) {
-				// 	if (Channel.users[j].user.userPush && Channel.users[j].user.notification && Channel.users[j].user._id != req.body.from.userId) {
-				// 		usersPush.push(Channel.users[j].user.userPush)
-				// 	}
-				// }
-				// if (usersPush.length) {
-				// 	var message = {
-				// 		app_id: config.oneSignalAppId,
-				// 		contents: {"en": lastMessage, "es": lastMessage},
-				// 		headings: {"en": req.body.from.name, "es": req.body.from.name},
-				// 		include_player_ids: usersPush,
-				// 		data: {
-				// 			"channel": Channel._id
-				// 		}
-				// 	};
-				// 	sendNotification(message);
-				// }
+				var usersPush = [];
+				for (var j = 0; j < datas.length; j++) {
+					if (datas[j] && datas[j]._id != req.body.from._id) {
+						usersPush.push(datas[j].userPush)
+					}
+				}
+				if (usersPush.length) {
+					var message = {
+						app_id: config.oneSignalAppId,
+						contents: {"en": lastMessage, "es": lastMessage},
+						headings: {"en": req.body.from.name, "es": req.body.from.name},
+						include_player_ids: usersPush,
+						data: {
+							"channel": Channel._id
+						}
+					};
+					sendNotification(message);
+				}
 
 			});
 
