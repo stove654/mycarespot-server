@@ -125,13 +125,20 @@ exports.create = function (req, res) {
 					if (req.body.location) {
 						lastMessage = 'Sent location'
 					}
+					if (req.body.pdf) {
+						lastMessage = 'Sent document'
+					}
 				}
 				var updated = _.merge(Channel, {lastMessage: lastMessage, lastMessageTime: new Date(), users: users});
 				updated.save();
 				var usersPush = [];
+				var user = null;
 				for (var j = 0; j < datas.length; j++) {
-					if (datas[j] && datas[j]._id != req.body.from._id) {
-						usersPush.push(datas[j].userPush)
+					if (datas[j] && datas[j]._id != req.body.from._id ) {
+						user = datas[j];
+						if (datas[j].userPush) {
+							usersPush.push(datas[j].userPush)
+						}
 					}
 				}
 				if (usersPush.length) {
@@ -141,7 +148,7 @@ exports.create = function (req, res) {
 						headings: {"en": req.body.from.name, "es": req.body.from.name},
 						include_player_ids: usersPush,
 						data: {
-							"channel": Channel._id
+							"channel": Channel
 						}
 					};
 					sendNotification(message);
