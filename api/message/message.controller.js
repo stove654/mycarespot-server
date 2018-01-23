@@ -59,7 +59,7 @@ exports.index = function (req, res) {
 	}
 	Message.find(query)
 		.limit(100)
-		.sort({'created_at' : -1})
+		.sort({createdAt:-1})
 		.exec(function (err, Messages) {
 			if (err) {
 				return handleError(res, err);
