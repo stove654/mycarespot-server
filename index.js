@@ -7,7 +7,7 @@ var path = require('path');
 var QRCode = require('qrcode')
 
 // set port
-var port = process.env.PORT || 8080;
+var port = process.env.PORT || 3000;
 
 // Connect to database
 mongoose.connect(config.database);
