@@ -4,7 +4,10 @@ var mongoose = require('mongoose'),
     Schema = mongoose.Schema;
 
 var ChannelSchema = new Schema({
-    users: [],
+    users: [{
+		userId: {type: Schema.Types.ObjectId, ref: 'User'},
+		read: 0
+	}],
     from: String,
     to: String,
     lastMessage: String,

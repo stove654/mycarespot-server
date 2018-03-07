@@ -15,6 +15,7 @@ var Channel = require('./channel.model');
 // Get list of Channels
 exports.index = function (req, res) {
     Channel.find({'users': {$elemMatch: {userId: req.query.userId}}, 'lastMessage': { $ne: null }})
+		.populate('users.userId')
         .exec(function (err, channels) {
             if (err) {
                 return handleError(res, err);
@@ -28,26 +29,11 @@ exports.index = function (req, res) {
 exports.show = function (req, res) {
     Channel.findById(req.params.id)
         .populate('to')
-        .populate('users.user')
+        .populate('users.userId')
         .exec(function (err, channel) {
             if (err) {
                 return handleError(res, err);
             }
-            if (channel.to) {
-                var user = {
-                    name: channel.to.name,
-                    _id: channel.to.id,
-                    color: channel.to.color,
-                    avatar: channel.to.avatar,
-                    phone: channel.to.phone
-                };
-                channel.to = user;
-            }
-
-            _.each(channel.users, function (data) {
-                data.user.contacts = null;
-                data.user.country = null;
-            })
             return res.json(channel);
         })
 
