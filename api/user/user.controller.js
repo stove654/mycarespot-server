@@ -51,19 +51,18 @@ exports.create = function (req, res, next) {
 				res.json(200, user);
 			});
 		} else {
-			User.findById(user.id, function (err, user) {
+			User.findById(user._id, function (err, user) {
 				if (err) { return handleError(res, err); }
 				if(!user) { return res.send(404); }
 				if (req.body.mycarespot) {
 					user.mycarespot = null
 				}
 				var updated = _.merge(user, req.body);
-				updated.save(function (err) {
+				updated.save(function (err, user) {
 					if (err) { return handleError(res, err); }
 					return res.json(200, user);
 				});
 			});
-			res.json(200, user);
 		}
 	});
 
