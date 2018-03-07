@@ -33,32 +33,22 @@ var UserSchema = new Schema({
     timestamp: Number,
     avatar: String,
     code: String,
-    pushToken: String,
     status: String,
     socketId: String,
     online: Boolean,
-    countryCode: Number,
-    block: [
-        {
-            userId: { type: Schema.Types.ObjectId, ref: 'User' },
-            name: String,
-            phone: String
-        }
-    ],
     notification: {
         type: Boolean,
         default: true
-    },
-    hideInfo: {
-        type: Boolean,
-        default: false
     },
     userPush: String,
     color: {
         type: String,
         default: getRandomColor()
     },
-    lastConnection: Date
+    lastConnection: Date,
+	id: Number,
+	mycarespot: {},
+	mycarespotRole: String
 }, {
     timestamps: true
 });

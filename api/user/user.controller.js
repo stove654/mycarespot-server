@@ -40,52 +40,32 @@ exports.update = function(req, res) {
  * Creates a new user
  */
 exports.create = function (req, res, next) {
-	User.findOne({name: req.body.name}, function (err, data) {
-		if (data) {
-			User.findById(data._id, function (err, user) {
-				if (err) { return handleError(res, err); }
-				if(!user) { return res.send(404); }
-				var updated = _.merge(user, {
-					userPush: req.body.userPush
-				});
-				if (req.body.userPush) {
-					updated.save(function (err) {
-						if (err) { return handleError(res, err); }
-						var token = jwt.sign({_id: user._id}, config.secret, {expiresIn: 60 * 24 *365});
-						return res.json({
-							success: true,
-							message: 'Enjoy your token!',
-							token: token,
-							_id: user._id
-						});
-					});
-				} else {
-					var token = jwt.sign({_id: user._id}, config.secret, {expiresIn: 60 * 24 *365});
-					return res.json({
-						success: true,
-						message: 'Enjoy your token!',
-						token: token,
-						_id: user._id
-					});
-				}
-
-			});
-		} else {
+	User.findOne({id: req.body.id}, function (err, user) {
+		if (err) return next(err);
+		if (!user) {
 			var newUser = new User(req.body);
 			newUser.provider = 'local';
-			newUser.role = 'user';
+			newUser.role = newUser.role|| 'user';
 			newUser.save(function (err, user) {
 				if (err) return validationError(res, err);
-				var token = jwt.sign({_id: user._id}, config.secret, {expiresIn: 60 * 24 *365});
-				return res.json({
-					success: true,
-					message: 'Enjoy your token!',
-					token: token,
-					_id: user._id
+				res.json(200, user);
+			});
+		} else {
+			User.findById(user.id, function (err, user) {
+				if (err) { return handleError(res, err); }
+				if(!user) { return res.send(404); }
+				if (req.body.mycarespot) {
+					user.mycarespot = null
+				}
+				var updated = _.merge(user, req.body);
+				updated.save(function (err) {
+					if (err) { return handleError(res, err); }
+					return res.json(200, user);
 				});
 			});
+			res.json(200, user);
 		}
-	})
+	});
 
 };
 
