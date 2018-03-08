@@ -14,7 +14,8 @@ var Channel = require('./channel.model');
 
 // Get list of Channels
 exports.index = function (req, res) {
-    Channel.find({'users': {$elemMatch: {userId: req.query.userId}}, 'lastMessage': { $ne: null }})
+	console.log(req.query.userId)
+    Channel.find({'users': {$elemMatch: {userId: req.query.userId}}})
 		.populate('users.userId')
         .exec(function (err, channels) {
             if (err) {
