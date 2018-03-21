@@ -14,7 +14,8 @@ var validationError = function (res, err) {
  * restriction: 'admin'
  */
 exports.index = function (req, res) {
-    User.find({}, '-salt -hashedPassword')
+	var query = req.query || {};
+    User.find(query, '-salt -hashedPassword')
         .sort({updatedAt:-1})
         .exec(function (err, users) {
             if(err) { return handleError(res, err); }
