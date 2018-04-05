@@ -45,6 +45,20 @@ var sendNotification = function(data) {
 	req.end();
 };
 
+exports.createVideoCall = function (req, res) {
+	var message = {
+		app_id: config.oneSignalAppId,
+		contents: {"en": 'You have a calling', "es": 'You have a calling'},
+		headings: {"en": req.body.name, "es": req.body.name},
+		include_player_ids: [req.body.userPush],
+		data: {
+			"videoCall": true,
+			"channelId": req.body.channel
+
+		}
+	};
+	sendNotification(message);
+};
 
 // Get list of Messages
 exports.index = function (req, res) {
