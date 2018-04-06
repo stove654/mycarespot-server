@@ -15,6 +15,7 @@ var Channel = require('../channel/channel.model');
 var config = require('../../config/config.js');
 
 var sendNotification = function(data) {
+	console.log(data);
 	var headers = {
 		"Content-Type": "application/json; charset=utf-8",
 		"Authorization": "Basic " + config.oneSignalKey
@@ -53,11 +54,14 @@ exports.createVideoCall = function (req, res) {
 		include_player_ids: [req.body.userPush],
 		data: {
 			"videoCall": true,
-			"channelId": req.body.channel
-
+			"channelId": req.body.channel,
+			"from": req.body.from
 		}
 	};
 	sendNotification(message);
+	res.json({
+		videoCall: true
+	})
 };
 
 // Get list of Messages
